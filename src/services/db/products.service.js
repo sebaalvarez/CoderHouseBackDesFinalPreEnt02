@@ -23,7 +23,7 @@ export default class StudentService {
       let limite = limit ? limit : 10;
       let pag = page ? page : 1;
       let orden = sort ? { price: sort } : {};
-      let objQuery = query ? JSON.parse(query) : {};
+      let objQuery = query ? query : {};
 
       let prod = await productsModel.paginate(objQuery, {
         limit: limite,
