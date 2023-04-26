@@ -7,23 +7,32 @@ const productService = new ProductService();
 
 const router = Router();
 
-// router.get("/", async (req, res) => {
-//   let products = await productService.getProducts();
-//   console.log(products);
-//   res.render("students", { products: products });
-// });
-
 /***  Obtiene Todos los productos y los muestra por navegador  ***/
 router.get("/products", async (req, res) => {
-  let products = await productService.getProducts();
-
-  res.render("home", { products });
+  let limit = req.query.limit;
+  let page = req.query.page;
+  let sort = req.query.sort;
+  let query = req.query.query;
+  // console.log(
+  //   `Limite: ${limit} || Pagina: ${page} || Orden: ${sort} || Query: ${query} `
+  // );
+  let prod = await productService.getProducts(limit, page, sort, query);
+  prod.prevLink = prod.hasPrevPage
+    ? `http://localhost:8080/products?page=${prod.prevPage}`
+    : "";
+  prod.nextLink = prod.hasNextPage
+    ? `http://localhost:8080/products?page=${prod.nextPage}`
+    : "";
+  prod.isValid = !(page <= 0 || page > prod.totalPages);
+  // let products = prod.docs.map((p) => p.toObject());
+  res.render("products", prod);
 });
 
-// router.get("/carts", async (req, res) => {
-//   let carts = await cartService.getAll();
-//   console.log(carts);
-//   res.render("courses", { carts });
-// });
+/***  Obtiene Todos los productos del Carrito indicado y los muestra por navegador  ***/
+router.get("/carts/:cid", async (req, res) => {
+  let carts = await cartService.getCartById(req.params.cid);
+
+  res.render("productsByCart", carts);
+});
 
 export default router;

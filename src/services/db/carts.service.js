@@ -68,7 +68,7 @@ export default class StudentService {
 
   getCartById = async (id) => {
     try {
-      let courses = await cartsModel.findOne({ _id: id });
+      let courses = await cartsModel.findOne({ _id: id }).lean();
       return courses;
     } catch (err) {
       console.error(`ERROR obteniendo el Carrito por ID: ${err}`);

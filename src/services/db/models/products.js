@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import mongoosePaginate from "mongoose-paginate-v2";
 
 const collectionName = "products";
 
@@ -31,6 +32,6 @@ const productSchema = new mongoose.Schema({
 // productSchema.pre("findOne", function () {
 //   this.populate("courses.course");
 // });
-
+productSchema.plugin(mongoosePaginate);
 const productsModel = mongoose.model(collectionName, productSchema);
 export default productsModel;

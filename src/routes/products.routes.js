@@ -8,21 +8,6 @@ let products = [];
 // const pm = new ProductManager(path.join(".", "files"));
 const pm = new ProductService();
 
-/****************************/
-/***  Salida por plantillas   **/
-/***************************/
-
-/***  Obtiene Todos los productos y los muestra por navegador  ***/
-// router.get("/", async (req, res) => {
-//   products = await pm.getProducts();
-
-//   res.render("home", { products });
-// });
-
-/****************************/
-/*****  Salida por url  *******/
-/***************************/
-
 /***   Obtiene Todos los productos ***/
 router.get("/", async (req, res) => {
   products = await pm.getProducts();
