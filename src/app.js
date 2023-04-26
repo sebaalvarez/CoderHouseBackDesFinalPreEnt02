@@ -1,11 +1,11 @@
 import express, { urlencoded } from "express";
 import exphbs from "express-handlebars";
-import { Server } from "socket.io";
+import mongoose from "mongoose";
 import _dirname from "./utils.js";
 import userRoutes from "./routes/users.routes.js";
 import productRoutes from "./routes/products.routes.js";
 import cartRoutes from "./routes/carts.routes.js";
-import ProductManager from "./controller/productManager.js";
+import viewsRouter from "./routes/views.router.js";
 import path from "path";
 
 const app = express();
@@ -32,6 +32,7 @@ app.engine(
 app.set("view engine", ".hbs");
 
 // endpoints
+app.use("/", viewsRouter);
 app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/carts", cartRoutes);
@@ -40,39 +41,40 @@ const httpServer = app.listen(PORT, () => {
   console.log(`Servidor escuchando en el puerto ${PORT}`);
 });
 
-let products = [];
-const pm = new ProductManager(path.join(".", "files"));
+const connectMongoDB = async () => {
+  try {
+    await mongoose.connect(
+      "mongodb://localhost:27017/ecommerce?retryWrites=true&w=majority"
+    );
+    console.log("Conectado con exito a MongoDB usando Moongose.");
 
-// web socket
-const socketServer = new Server(httpServer);
+    /*let nuevoEstudiante = await studentsModel.create({
+            name: "Luis",
+            lastName : "Munar",
+            age : "20",
+        });*/
 
-/***     Manejo de socket ***/
-socketServer.on("connection", (socket) => {
-  // mensaje de nuevo cliente conectado
-  socket.on("inicio", async (data) => {
-    console.log(data);
-    products = await pm.getProducts();
-    socketServer.emit("productos", { products });
-  });
+    /*let nuevoCurso = await coursesModel.create(
+            {
+                title: "Curso Backend",
+                description: "Curso backend de NodeJS",
+                teacherName: "Juan Torres"
+            }
+        );*/
 
-  // Para eliminar producto
-  socket.on("deleteProduct", async (data) => {
-    await pm.deleteProductoById(parseInt(data));
-    products = await pm.getProducts();
-    socketServer.emit("productos", { products });
-  });
+    // let student = await studentsModel.findOne({
+    //   _id: "640a705f72d18c48ca6f6741",
+    // });
+    // console.log(JSON.stringify(student, null, "\t"));
 
-  // Para agregar producto
-  socket.on("addProduct", async (data) => {
-    let arrVali = pm.validaIngresos(data);
+    //student.courses.push({course: "640a719de27c256369c70d15"});
+    //console.log(JSON.stringify(student));
 
-    if (arrVali[0] === 1) {
-      socket.emit("error", arrVali[1]);
-    } else {
-      await pm.addProduct(data);
-    }
-
-    products = await pm.getProducts();
-    socketServer.emit("productos", { products });
-  });
-});
+    //let result = await studentsModel.updateOne(student);
+    //console.log(result);
+  } catch (error) {
+    console.error("No se pudo conectar a la BD usando Moongose: " + error);
+    process.exit();
+  }
+};
+connectMongoDB();

@@ -1,10 +1,13 @@
 import { Router } from "express";
 import CartManager from "../controller/cartManager.js";
 import ProductManager from "../controller/productManager.js";
+import ProductService from "../services/db/products.service.js";
+import CartService from "../services/db/carts.service.js";
 
 const router = Router();
 let carts = [];
-const car = new CartManager("./files");
+// const car = new CartManager("./files");
+const car = new CartService();
 
 /***   Carga carrito ***/
 router.post("/", async (req, res) => {
@@ -16,7 +19,6 @@ router.post("/", async (req, res) => {
 });
 
 /***   Obtiene Todos los carritos ***/
-/*
 router.get("/", async (req, res) => {
   carts = await car.getCarts();
   let limit = req.query.limit;
@@ -26,13 +28,12 @@ router.get("/", async (req, res) => {
     message: !limit ? carts : carts.slice(0, limit),
   });
 });
-*/
 
 /***   Obtiene carrito por ID ***/
 router.get("/:cid", async (req, res) => {
-  carts = await car.getCartById(parseInt(req.params.cid));
+  carts = await car.getCartById(req.params.cid);
 
-  if (Object.keys(carts).length === 0) {
+  if (carts.length === 0) {
     res.status(202).send({
       status: "info",
       error: `No se encontró el carrito con ID: ${req.params.cid}`,
@@ -43,23 +44,22 @@ router.get("/:cid", async (req, res) => {
 });
 
 /***   Cargo Producto en Carrito ID ***/
-router.post("/:cid/product/:pid", async (req, res) => {
-  let cid = parseInt(req.params.cid);
-  let pid = parseInt(req.params.pid);
+router.post("/:cid/products/:pid", async (req, res) => {
+  let cid = req.params.cid;
+  let pid = req.params.pid;
 
   let carts = await car.getCartById(cid);
 
   /* Verifico si existe el id del carrito */
-  if (Object.keys(carts).length === 0) {
+  if (carts.length === 0) {
     res.status(202).send({
       status: "info",
       error: `No se encontró el carrito con Id: ${cid}`,
     });
   } else {
-    let productArry = await new ProductManager("./files").getProductById(pid);
-
+    let product = await new ProductService().getProductById(pid);
     /* Verifico si existe el id del producto en el maestro de productos  */
-    if (Object.keys(productArry).length === 0) {
+    if (product.length === 0) {
       res.status(202).send({
         status: "info",
         error: `Se encontró carrito con ID: ${cid} pero No se encontró el producto con Id: ${pid}`,
@@ -73,6 +73,93 @@ router.post("/:cid/product/:pid", async (req, res) => {
         message: `Se agrego-actualizó el producto Id: ${pid} en el carrito con Id: ${cid}`,
       });
     }
+  }
+});
+
+/***    Borro todos los productos del carrito  ***/
+router.delete("/:cid", async (req, res) => {
+  carts = await car.deleteProducts(req.params.cid);
+
+  if (carts.length === 0) {
+    res.status(202).send({
+      status: "info",
+      error: `No se encontró el carrito con ID: ${req.params.cid}`,
+    });
+  } else {
+    res.status(200).send({ status: "Success", message: carts });
+  }
+});
+
+/***    Borro del carrito el producto indicado   ***/
+router.delete("/:cid/products/:pid", async (req, res) => {
+  let cid = req.params.cid;
+  let pid = req.params.pid;
+
+  carts = await car.deleteProductById(cid, pid);
+
+  if (carts.length === 0) {
+    res.status(202).send({
+      status: "info",
+      error: `No se encontró el carrito con ID: ${req.params.cid}`,
+    });
+  } else {
+    res.status(200).send({ status: "Success", message: carts });
+  }
+});
+
+/***   Actualizo la cantidad de un producto pasandole por el body ***/
+router.put("/:cid/product/:pid", async (req, res) => {
+  let cid = req.params.cid;
+  let pid = req.params.pid;
+  let qty = req.body.quantity;
+
+  let carts = await car.getCartById(cid);
+
+  /* Verifico si existe el id del carrito */
+  if (carts.length === 0) {
+    res.status(202).send({
+      status: "info",
+      error: `No se encontró el carrito con Id: ${cid}`,
+    });
+  } else {
+    let product = await new ProductService().getProductById(pid);
+    /* Verifico si existe el id del producto en el maestro de productos  */
+    if (product.length === 0) {
+      res.status(202).send({
+        status: "info",
+        error: `Se encontró carrito con ID: ${cid} pero No se encontró el producto con Id: ${pid}`,
+      });
+    } else {
+      /* Existe el id del carrito y el id del producto en el maestro de productos */
+      car.updateQuantityProduct(cid, pid, qty);
+
+      res.status(200).send({
+        status: "Success",
+        message: `Se actualizó el producto Id: ${pid} en el carrito con Id: ${cid}`,
+      });
+    }
+  }
+});
+
+/***   Agrego productos desde un array por el body  ***/
+router.put("/:cid", async (req, res) => {
+  let cid = req.params.cid;
+  let arr = req.body;
+
+  let carts = await car.getCartById(cid);
+
+  /* Verifico si existe el id del carrito */
+  if (carts.length === 0) {
+    res.status(202).send({
+      status: "info",
+      error: `No se encontró el carrito con Id: ${cid}`,
+    });
+  } else {
+    car.updateProductByArray(cid, arr);
+    res.status(200).send({
+      status: "Success",
+      message: `Se actualizó  el carrito con Id: ${cid}`,
+    });
   }
 });
 
