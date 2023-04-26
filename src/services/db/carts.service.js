@@ -123,10 +123,11 @@ export default class StudentService {
         if (ind >= 0) {
           /* Encuentra el producto en el carrito => suma cantidad */
           // console.log("Encontro el producto");
+          productInCart.splice(ind, 1);
 
           let result = await cartsModel.findByIdAndUpdate(
             { _id: cid },
-            { products: productInCart.splice(ind, 1) }
+            { products: productInCart }
           );
           return result;
         }
