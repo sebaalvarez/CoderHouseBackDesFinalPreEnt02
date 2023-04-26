@@ -14,7 +14,7 @@ const router = Router();
 // });
 
 /***  Obtiene Todos los productos y los muestra por navegador  ***/
-router.get("/", async (req, res) => {
+router.get("/products", async (req, res) => {
   let products = await productService.getProducts();
 
   res.render("home", { products });
