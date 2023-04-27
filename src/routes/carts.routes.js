@@ -1,12 +1,13 @@
 import { Router } from "express";
-import CartManager from "../controller/cartManager.js";
-import ProductManager from "../controller/productManager.js";
-import ProductService from "../services/db/products.service.js";
-import CartService from "../services/db/carts.service.js";
+// import path from "path";
+// import CartManager from "../services/filesystem/controller/cartManager.js";
+// import ProductManager from "../services/filesystem/controller/productManager.js";
+import CartService from "../services/db/controllers/carts.service.js";
+import ProductService from "../services/db/controllers/products.service.js";
 
 const router = Router();
-let carts = [];
-// const car = new CartManager("./files");
+
+// const car = new CartManager(path.join(".", "files"));
 const car = new CartService();
 
 /***   Carga carrito ***/
@@ -20,7 +21,7 @@ router.post("/", async (req, res) => {
 
 /***   Obtiene Todos los carritos ***/
 router.get("/", async (req, res) => {
-  carts = await car.getCarts();
+  let carts = await car.getCarts();
   let limit = req.query.limit;
 
   res.status(200).send({
@@ -31,7 +32,7 @@ router.get("/", async (req, res) => {
 
 /***   Obtiene carrito por ID ***/
 router.get("/:cid", async (req, res) => {
-  carts = await car.getCartById(req.params.cid);
+  let carts = await car.getCartById(req.params.cid);
 
   if (carts.length === 0) {
     res.status(202).send({
@@ -78,7 +79,7 @@ router.post("/:cid/products/:pid", async (req, res) => {
 
 /***    Borro todos los productos del carrito  ***/
 router.delete("/:cid", async (req, res) => {
-  carts = await car.deleteProducts(req.params.cid);
+  let carts = await car.deleteProducts(req.params.cid);
 
   if (carts.length === 0) {
     res.status(202).send({
@@ -95,7 +96,7 @@ router.delete("/:cid/products/:pid", async (req, res) => {
   let cid = req.params.cid;
   let pid = req.params.pid;
 
-  carts = await car.deleteProductById(cid, pid);
+  let carts = await car.deleteProductById(cid, pid);
 
   if (carts.length === 0) {
     res.status(202).send({

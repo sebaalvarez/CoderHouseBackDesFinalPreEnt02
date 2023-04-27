@@ -2,7 +2,7 @@ import express, { urlencoded } from "express";
 import exphbs from "express-handlebars";
 import mongoose from "mongoose";
 import _dirname from "./utils.js";
-import userRoutes from "./routes/users.routes.js";
+
 import productRoutes from "./routes/products.routes.js";
 import cartRoutes from "./routes/carts.routes.js";
 import viewsRouter from "./routes/views.router.js";
@@ -33,7 +33,6 @@ app.set("view engine", ".hbs");
 
 // endpoints
 app.use("/", viewsRouter);
-app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/carts", cartRoutes);
 

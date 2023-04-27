@@ -1,4 +1,4 @@
-import productsModel from "./models/products.js";
+import productsModel from "../models/products.js";
 
 export default class StudentService {
   constructor() {
@@ -9,10 +9,11 @@ export default class StudentService {
     try {
       let result = await productsModel.create(product);
       console.log(`Se cargo el producto ${product.code}`);
+      console.log(`RESULTADO: ${JSON.stringify(result, null, "\t")}`);
       return result;
     } catch (err) {
       console.error(`ERROR agregando Productos: ${err}`);
-      return [];
+      return result;
     }
   };
 
@@ -52,11 +53,9 @@ export default class StudentService {
 
   updateProductById = async (id, product) => {
     try {
-      let result = await productsModel.updateOne(
-        { _id: id },
-        { $set: { title: "ACTUALIZADO" } }
-      );
-      console.log(`Se cargo el producto ${result}`);
+      let { _id, ...rest } = product;
+
+      let result = await productsModel.updateOne({ _id: id }, rest);
 
       console.log(`El producto id: ${id} fue actualizado correctamente`);
       return result;
